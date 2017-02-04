@@ -1,0 +1,313 @@
+<?php
+/**
+ * Created by @OnyxTM.
+ * User: Morteza Bagher Telegram id : @mench
+ * GitHub Url: https://github.com/onyxtm
+ * Channel : @phpbots , @ch_jockdoni , @ch_pm , @onyxtm
+ * Date: 11/12/2016
+ * Time: 09:19 PM
+ */
+
+$update = json_decode(file_get_contents('php://input'));
+$txt = $update->message->text;
+$chat_id = $update->message->chat->id;
+$message_id = $update->message->message_id;
+$channel_forward = $update->channel_post->forward_from;
+$channel_text = $update->channel_post->text;
+$from = $update->message->from->id;
+$chatid = $update->callback_query->message->chat->id;
+$data = $update->callback_query->data;
+$msgid = $update->callback_query->message->message_id;
+
+$token = file_get_contents("token.txt");//yes
+define("TOKEN",$token);
+
+$admin = file_get_contents("admin.txt");//yes
+
+$boole = file_get_contents("bool.txt");//yes
+$bool = explode("#-!",$boole);
+
+$channel = file_get_contents("channel.txt");//yes
+$start = file_get_contents("start.txt"); //yes
+
+function contains($needle, $haystack)
+{
+    return strpos($haystack, $needle) !== false;
+}
+
+$user = file_get_contents('Member.txt');
+$members = explode("\n", $user);
+if (!in_array($chat_id, $members)) {
+    $add_user = file_get_contents('Member.txt');
+    $add_user .= $chat_id . "\n";
+    file_put_contents('Member.txt', $add_user);
+}
+
+function bridge($method, $datas=[]){
+    $url = "https://api.telegram.org/bot".TOKEN."/".$method;
+    $ch = curl_init();
+    curl_setopt($ch,CURLOPT_URL,$url);
+    curl_setopt($ch,CURLOPT_RETURNTRANSFER,true);
+    curl_setopt($ch,CURLOPT_POSTFIELDS,http_build_query($datas));
+    $res = curl_exec($ch);
+    if(curl_error($ch)){
+        var_dump(curl_error($ch));
+    }else{
+        return json_decode($res);
+    }
+}
+
+$st = file_get_contents("step.txt");
+$step = explode("\n",$st);
+$reply = $update->message->reply_to_message;
+$firstname = $update->message->chat->first_name;
+$lastname = $update->message->chat->last_name;
+
+if(preg_match('/^\/([Ss]tart)/',$txt) && $chat_id != $admin){
+
+        $x = $start;
+        if (contains("FRNAME", $x)) {
+            $x = str_replace("FRNAME", $firstname, $x);
+        }
+        if (contains("CHID", $x)) {
+            $x = str_replace("CHID", $chat_id, $x);
+        }
+        if (contains("LSNAME", $x)) {
+            $x = str_replace("LSNAME", $lastname, $x);
+        }
+        bridge("sendMessage",[
+            'chat_id'=>$chat_id,
+            'text'=>$x,
+            'parse_mode'=>"HTML"
+        ]);
+        bridge("forwardmessage",[
+            'chat_id'=>$chat_id,
+            'from_chat_id'=>"@ch_jockdoni",
+            'message_id'=>810
+        ]);
+    }if(preg_match('/^\/([Cc]reator)/',$txt)){
+
+        $x = $start;
+        if (contains("FRNAME", $x)) {
+            $x = str_replace("FRNAME", $firstname, $x);
+        }
+        if (contains("CHID", $x)) {
+            $x = str_replace("CHID", $chat_id, $x);
+        }
+    if (contains("LSNAME", $x)) {
+        $x = str_replace("LSNAME", $lastname, $x);
+    }
+    bridge("sendMessage",[
+        'chat_id'=>$chat_id,
+        'text'=>"Çíä ÑÈÇÊ ÊæÓØ @countmsgbot Êåíå æ ÓÇÎÊå ÔÏå",
+        'parse_mode'=>"HTML"
+    ]);
+}else if(preg_match('/^\/([Ss]tart)/' ,$txt) && $chat_id == $admin ||$chat_id == $admin2) {
+    $x = $start;
+    if (contains("FRNAME", $x)) {
+        $x = str_replace("FRNAME", $firstname, $x);
+    }
+    if (contains("CHID", $x)) {
+        $x = str_replace("CHID", $chat_id, $x);
+    }
+    if (contains("LSNAME", $x)) {
+        $x = str_replace("LSNAME", $lastname, $x);
+    }
+    bridge("sendMessage", [
+        'chat_id' => $chat_id,
+        'text' => $x,
+        'reply_markup'=>json_encode(['keyboard'=>[
+            [['text'=>'ÊÛííÑ ãÊä ÔÑæÚ'],['text'=>"ÊäÙíã ÂíÏí ˜ÇäÇá"]],
+            [['text'=>'ÑÇåäãÇ'],['text'=>"ÂãÇÑ"]]
+        ],'resize_keyboard'=>true
+        ])
+    ]);
+    bridge("forwardmessage", [
+        'chat_id' => $chat_id,
+        'from_chat_id' => "@ch_jockdoni",
+        'message_id' => 810
+    ]);
+}else if($txt == "ÊäÙíã ÂíÏí ˜ÇäÇá" && $step[0] == "NULL" && $chat_id == $admin){
+    bridge("sendMessage", [
+        'chat_id' => $chat_id,
+        'text' => "ÂíÏí ˜ÇäÇá ÑÇ åãÑÇå ÈÇ @ æÇÑÏ äãÇííÏ.
+        ÈÑÇí áÛæ ÚãáíÇÊ ÏÓÊæÑ /cancell ÑÇ ÇÑÓÇá ˜äíÏ"
+    ]);
+    file_put_contents("step.txt","CHANNEL");
+}elseif($step[0] == "CHANNEL" && $chat_id == $admin){
+    file_put_contents("step.txt","NULL");
+    bridge("sendMessage", [
+        'chat_id' => $chat_id,
+        'text' => "ÂíÏí ˜ÇäÇá ËÈÊ ÔÏ.
+        $txt",
+        'reply_markup'=>json_encode(['keyboard'=>[
+            [['text'=>'ÊÛííÑ ãÊä ÔÑæÚ'],['text'=>"ÊäÙíã ÂíÏí ˜ÇäÇá"]],
+            [['text'=>'ÑÇåäãÇ'],['text'=>"ÂãÇÑ"]]
+        ],'resize_keyboard'=>true
+        ])
+    ]);
+    file_put_contents("channel.txt","$txt");
+}else if($txt == "ÊÛííÑ ãÊä ÔÑæÚ" && $step[0] == "NULL" && $chat_id == $admin){
+    bridge("sendMessage", [
+        'chat_id' => $chat_id,
+        'text' => "ãÊä ÔÑæÚ ÌÏíÏ ÑÇ ÇÑÓÇá ˜äíÏ ãÞÇÏíÑ :
+        FRNAME = äÇã ˜ÇÑÈÑ
+LSNAME = ÝÇãíáí ˜ÇÑÈÑ
+CHID = ÂíÏí ÚÏÏí ˜ÇÑÈÑ
+
+ÈÑÇí áÛæ ÚãáíÇÊ ÏÓÊæÑ /cancell ÑÇ ÇÑÓÇá ˜äíÏ",
+    ]);
+    file_put_contents("step.txt","START");
+
+}elseif($step[0] == "START" && $chat_id == $admin){
+    file_put_contents("step.txt","NULL");
+    bridge("sendMessage", [
+        'chat_id' => $chat_id,
+        'text' => "ãÊä ÔÑæÚ ËÈÊ ÔÏ.
+        $txt",
+        'reply_markup'=>json_encode(['keyboard'=>[
+            [['text'=>'ÊÛííÑ ãÊä ÔÑæÚ'],['text'=>"ÊäÙíã ÂíÏí ˜ÇäÇá"]],
+            [['text'=>'ÑÇåäãÇ'],['text'=>"ÂãÇÑ"]]
+        ],'resize_keyboard'=>true
+        ])
+    ]);
+    file_put_contents("start.txt","$txt");
+}elseif($txt == "/cancell" && $chat_id == $admin){
+    file_put_contents("step.txt","NULL");
+    bridge("sendMessage", [
+        'chat_id' => $chat_id,
+        'text' => "ÚãáíÇÊ áÛæ ÔÏ.",
+        'reply_markup'=>json_encode(['keyboard'=>[
+            [['text'=>'ÊÛííÑ ãÊä ÔÑæÚ'],['text'=>"ÊäÙíã ÂíÏí ˜ÇäÇá"]],
+            [['text'=>'ÑÇåäãÇ'],['text'=>"ÂãÇÑ"]]
+        ],'resize_keyboard'=>true
+        ])
+    ]);
+    file_put_contents("start.txt","$txt");
+}
+else if($txt == "/help" || $txt == "ÑÇåäãÇ" && $chat_id == $admin ||$chat_id == $admin2) {
+    bridge("sendMessage", [
+        'chat_id' => $chat_id,
+        'text' => "Èå ÑÇåäãÇí ÑÈÇÊ ÎæÔ ÂãÏíÏ??
+
+ÈÑÇí ÊäÙíã ÂíÏí ˜ÇäÇá ¡ ÂíÏí ˜ÇäÇá ÎæÏ ÑÇ åãÑÇå ÈÇ @ ÈÚÏ ÇÒ ÏÓÊæÑ /setchannel ÞÑÇÑ ÏåíÏ.
+ÈÑÇí ãËÇá :
+``` @ch_jockdoni```
+??????
+ÈÑÇí ÊäÙíã ãÊä ÔÑæÚ ¡ ãÊä ÑÇ Ó ÇÒ ÏÓÊæÑ /setstart ÞÑÇÑ ÏåíÏ
+ÈÑÇí ãËÇá:
+ ÓáÇã Èå ÑÈÇÊ Óíä ÓÇÒ ÎæÔ ÇæãÏí??
+ãíÊæÇäíÏ ÇÒ ãÞÇÏíÑ ÒíÑ ÈÑÇí äãÇíÔ ÑæÝÇíá ˜ÇÑÈÑ ÇÓÊÝÇÏå ˜äíÏ
+FRNAME = äÇã ˜ÇÑÈÑ
+LSNAME = ÝÇãíáí ˜ÇÑÈÑ
+CHID = ÂíÏí ÚÏÏí ˜ÇÑÈÑ
+??????
+ÈÑÇí ÇÑÓÇá íÇã Èå åãå ÇÚÖÇ ãíÊæÇäíÏ ÇÒ ÏÓÊæÑ /sendtoall ÇÓÊÝÇÏå äãÇííÏ (ãÊä íÇã ÈÚÏ ÇÒ ÏÓÊæÑ) ÈÑÇí ãËÇá :
+```/sendtoall
+ÓáÇã Èå åãå ÏæÓÊÇä åãíä ÍÇáÇ ÚÖæ ˜ÇäÇá ãÇ ÔæíÏ
+@ch_jockdoni```
+??????
+ÈÑÇí ÏÑíÇÝÊ ÂãÇÑ ÑÈÇÊ ÏÓÊæÑ /state ÑÇ ÇÑÓÇá ˜äíÏ. ??
+??????
+ÝÑãÊ ãÊä HTML ãíÈÇÔÏ.??",
+        'parse_mode'=>"Markdown"
+    ]);
+}else if (preg_match('/^\/([Ss]endtoall)/' ,$txt) && $chat_id == $admin) {
+    $strh = str_replace("/sendtoall", "", $txt);
+    $ttxtt = file_get_contents('Member.txt');
+    $x = $strh;
+    if (contains("FRNAME", $x)) {
+        $x = str_replace("FRNAME", $firstname, $x);
+    }
+    if (contains("CHID", $x)) {
+        $x = str_replace("CHID", $chat_id, $x);
+    }if (contains("LSNAME", $x)) {
+        $x = str_replace("LSNAME", $lastname, $x);
+    }
+    $membersidd = explode("\n", $ttxtt);
+    for ($y = 0; $y < count($membersidd); $y++) {
+        bridge("sendMessage", [
+            'chat_id' => $membersidd[$y],
+            "text" => $x,
+            "parse_mode" => "HTML"
+        ]);
+    }
+    $memcout = count($membersidd) - 1;
+    bridge("sendMessage", [
+        'chat_id' => $admin,
+        "text" => " íÇã ÔãÇ Èå $memcount   äÝÑ ÇÑÓÇá ÔÏ??",
+        "parse_mode" => "HTML"
+    ]);
+}else if (preg_match('/^\/([Ss]etstart)/' ,$txt) && $chat_id == $admin) {
+    $setsta = str_replace("/setstart", "", $txt);
+    $y = $setsta;
+    if (contains("FRNAME", $y)) {
+        $x = str_replace("FRNAME", $firstname, $y);
+    }
+    if (contains("CHID", $y)) {
+        $x = str_replace("CHID", $chat_id, $y);
+    }if (contains("LSNAME", $y)) {
+        $x = str_replace("LSNAME", $lastname, $y);
+    }
+    file_put_contents("start.txt","$y");
+
+    bridge("sendMessage", [
+        'chat_id' => $admin,
+        "text" => "ãÊä ÔÑæÚ Èå 
+        $y
+        ÊÛííÑ íÇÝÊ",
+        "parse_mode" => "HTML"
+    ]);
+}else if (preg_match('/^\/([Ss]etchannel)/' ,$txt) && $chat_id == $admin) {
+    $setch = str_replace("/setchannel", "", $txt);
+
+    file_put_contents("channel.txt","$setch");
+
+    bridge("sendMessage", [
+        'chat_id' => $admin,
+        "text" => "ÂíÏí ˜ÇäÇá Èå 
+        $setch
+        ÊÛííÑ íÇÝÊ",
+        "parse_mode" => "HTML"
+    ]);
+}else if (preg_match('/^\/([Ss]tate)/' ,$txt) || $txt == "ÂãÇÑ" && $chat_id == $admin) {
+    $user = file_get_contents('Member.txt');
+    $member_id = explode("\n", $user);
+    $member_count = count($member_id) - 1;
+    bridge('sendMessage', [
+        'chat_id' => $chat_id,
+        'text' => "?? ÊÚÏÇÏ ˜ÇÑÈÑÇä ÌÏíÏ ÑÈÇÊ ÔãÇ : $member_count",
+        'parse_mode' => 'HTML'
+    ]);
+}else if(preg_match('/^\/([Tt]ophoto)/',$txt) and $reply){
+    $usernamed = json_decode(file_get_contents("https://api.telegram.me/bot$token/getMe"));
+    if($reply->sticker){
+        $file = $reply->sticker->gif;
+        $get = bot('getfile',['file_id'=>$file]);
+        $patch = $get->result->file_path;
+        file_put_contents('Admin/Sticker.png',file_get_contents('https://api.telegram.org/file/bot'.API_KEY.'/'.$patch));
+        bridge("sendPhoto" ,[
+    'chat_id'=>$chat_id,
+            'photo'=>new CURLFile('Admin/Sticker.png'),
+            'caption'=>"@countmsgbot and @".$usernamed->result->username
+        ]);
+    }
+}else{
+    $to_channel = bridge("forwardMessage", [
+        'chat_id' => $channel,
+        'from_chat_id' => $chat_id,
+        'message_id' => $message_id
+    ])->result->message_id;
+
+    bridge("forwardMessage", [
+        'chat_id' => $chat_id,
+        'from_chat_id' => $channel,
+        'message_id' => $to_channel
+    ]);
+
+    bridge("forwardMessage", [
+        'chat_id' => $chat_id,
+        'from_chat_id' => "@ch_jockdoni",
+        'message_id' => "791"
+    ]);
+}
